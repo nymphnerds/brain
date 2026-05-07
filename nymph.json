@@ -49,7 +49,32 @@
     "stop": "scripts/brain_stop.sh",
     "open": "scripts/brain_open.sh",
     "logs": "scripts/brain_logs.sh",
-    "refresh": "scripts/brain_refresh.sh"
+    "refresh": "scripts/brain_refresh.sh",
+    "uninstall": "scripts/brain_uninstall.sh"
+  },
+  "uninstall": {
+    "supports_purge": true,
+    "requires_confirmation": true,
+    "dry_run_arg": "--dry-run",
+    "confirm_arg": "--yes",
+    "purge_arg": "--purge",
+    "preserve_by_default": [
+      "models",
+      "open-webui-data",
+      "mcp",
+      "secrets",
+      "logs"
+    ],
+    "removes_by_default": [
+      "bin",
+      "venv",
+      "mcp-venv",
+      "open-webui-venv",
+      "local-tools",
+      "npm-global",
+      "lmstudio",
+      "nymph-agent.py"
+    ]
   },
   "dependencies": {
     "python": "3.10+ or 3.11",
