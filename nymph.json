@@ -1,0 +1,67 @@
+{
+  "manifest_version": 1,
+  "id": "brain",
+  "name": "Brain",
+  "short_name": "BR",
+  "description": "Local assistant, llama-server, Open WebUI, and MCP orchestration stack packaged as an installable Nymph module.",
+  "category": "service",
+  "packaging": "repo",
+  "repo": {
+    "url": "https://github.com/nymphnerds/brain.git",
+    "branch": "main"
+  },
+  "install": {
+    "path": "$HOME/Nymphs-Brain",
+    "script": "scripts/install_brain.sh"
+  },
+  "runtime": {
+    "services": [
+      {
+        "id": "llama-server",
+        "host": "127.0.0.1",
+        "port": 8000,
+        "health_url": "http://127.0.0.1:8000/v1/models"
+      },
+      {
+        "id": "open-webui",
+        "host": "127.0.0.1",
+        "port": 8081,
+        "url": "http://127.0.0.1:8081"
+      },
+      {
+        "id": "mcp",
+        "host": "127.0.0.1",
+        "port": 8100,
+        "status_url": "http://127.0.0.1:8100/status"
+      },
+      {
+        "id": "mcpo",
+        "host": "127.0.0.1",
+        "port": 8099,
+        "url": "http://127.0.0.1:8099"
+      }
+    ]
+  },
+  "manager": {
+    "page": "custom",
+    "status": "scripts/brain_status.sh",
+    "start": "scripts/brain_start.sh",
+    "stop": "scripts/brain_stop.sh",
+    "open": "scripts/brain_open.sh",
+    "logs": "scripts/brain_logs.sh",
+    "refresh": "scripts/brain_refresh.sh"
+  },
+  "dependencies": {
+    "python": "3.10+ or 3.11",
+    "node": "20.19.0 local bootstrap when needed",
+    "llama_cpp": "built locally with CUDA support",
+    "lm_studio": "used for model download and management",
+    "open_webui": "installed into local venv",
+    "mcp": "mcp-proxy and mcpo installed into local venv"
+  },
+  "notes": [
+    "Brain is an installer module, not a runtime dump.",
+    "The custom manager page should expose separate service controls and model management.",
+    "Do not commit local models, venvs, Open WebUI databases, logs, secrets, or built llama-server binaries."
+  ]
+}
