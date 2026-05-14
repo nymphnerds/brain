@@ -3,6 +3,7 @@ set -euo pipefail
 
 INSTALL_ROOT="${HOME}/Nymphs-Brain"
 SCRIPT_SOURCE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MODULE_ROOT="$(cd "${SCRIPT_SOURCE_DIR}/.." && pwd)"
 MODEL_ID=""
 QUANTIZATION="q4_k_m"
 CONTEXT_LENGTH="16384"
@@ -2606,3 +2607,22 @@ echo "  ${BIN_DIR}/lms-model   # Download/configure a model first"
 echo "  ${BIN_DIR}/lms-start   # Start the LLM server (port 8000)"
 echo "  ${BIN_DIR}/mcp-start   # Start MCP gateway"
 echo "  ${BIN_DIR}/open-webui-start  # Start Open WebUI"
+install -m 644 "${MODULE_ROOT}/nymph.json" "${INSTALL_ROOT}/nymph.json"
+mkdir -p "${SCRIPTS_DIR}"
+install -m 755 "${MODULE_ROOT}/scripts/_brain_common.sh" "${SCRIPTS_DIR}/_brain_common.sh"
+for manager_script in "${MODULE_ROOT}"/scripts/brain_*.sh; do
+  [[ -f "${manager_script}" ]] || continue
+  install -m 755 "${manager_script}" "${SCRIPTS_DIR}/$(basename "${manager_script}")"
+done
+module_version="$(python3 - "${MODULE_ROOT}/nymph.json" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    manifest = json.load(handle)
+
+print(str(manifest.get("version", "unknown")).strip() or "unknown")
+PY
+)"
+printf '%s\n' "${module_version}" > "${INSTALL_ROOT}/.nymph-module-version"
+echo "installed_module_version=${module_version}"

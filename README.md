@@ -48,12 +48,16 @@ scripts/install_brain.sh
 scripts/brain_status.sh
 scripts/brain_start.sh
 scripts/brain_stop.sh
+scripts/brain_webui.sh
+scripts/brain_manage_models.sh
+scripts/brain_apply_key.sh
 scripts/brain_open.sh
 scripts/brain_logs.sh
-scripts/brain_refresh.sh
 ```
 
-The Brain manager page should remain custom. It needs controls for separate services and model management rather than a generic single-service module view.
+Brain uses native Manager module actions. Open WebUI is exposed through the
+WORBI-style `local_url` path, and Manage Models keeps the installed interactive
+`lms-model` terminal flow.
 
 ## Default Local URLs
 
@@ -76,6 +80,7 @@ After install:
 ```
 
 The installer does not need to download a model by default. A model can be selected later from the custom manager page or by running `lms-model`.
+The Manager `Manage Models` action opens the same `lms-model` script in a terminal.
 
 ## Repo Rule
 

@@ -64,7 +64,9 @@ MCP gateway:  8100
 mcpo bridge:  8099
 ```
 
-The manager page must stay custom because Brain needs separate controls for model management, local LLM, Open WebUI, MCP, logs, and remote model settings.
+The Manager page should stay native and module-owned through `nymph.json`.
+Open WebUI uses the WORBI-style `local_url` path. Manage Models keeps the
+interactive `lms-model` terminal flow.
 
 ## What Stays Out Of Git
 

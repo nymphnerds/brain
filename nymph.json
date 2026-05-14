@@ -3,6 +3,7 @@
   "id": "brain",
   "name": "Brain",
   "short_name": "BR",
+  "version": "0.1.1",
   "description": "Local assistant, llama-server, Open WebUI, and MCP orchestration stack packaged as an installable Nymph module.",
   "category": "service",
   "packaging": "repo",
@@ -10,9 +11,19 @@
     "url": "https://github.com/nymphnerds/brain.git",
     "branch": "main"
   },
+  "source": {
+    "type": "repo",
+    "repo": "https://github.com/nymphnerds/brain.git",
+    "ref": "main"
+  },
   "install": {
-    "path": "$HOME/Nymphs-Brain",
-    "script": "scripts/install_brain.sh"
+    "root": "$HOME/Nymphs-Brain",
+    "entrypoint": "scripts/install_brain.sh",
+    "version_marker": "$HOME/Nymphs-Brain/.nymph-module-version",
+    "installed_markers": [
+      "$HOME/Nymphs-Brain/.nymph-module-version",
+      "$HOME/Nymphs-Brain/bin/brain-status"
+    ]
   },
   "runtime": {
     "services": [
@@ -42,15 +53,90 @@
       }
     ]
   },
-  "manager": {
-    "page": "custom",
+  "entrypoints": {
+    "install": "scripts/install_brain.sh",
     "status": "scripts/brain_status.sh",
     "start": "scripts/brain_start.sh",
     "stop": "scripts/brain_stop.sh",
+    "webui": "scripts/brain_webui.sh",
     "open": "scripts/brain_open.sh",
+    "manage_models": "scripts/brain_manage_models.sh",
+    "apply_key": "scripts/brain_apply_key.sh",
     "logs": "scripts/brain_logs.sh",
-    "refresh": "scripts/brain_refresh.sh",
     "uninstall": "scripts/brain_uninstall.sh"
+  },
+  "ui": {
+    "sort_order": 10,
+    "standard_lifecycle_rail": true,
+    "manager_ui": {
+      "type": "local_url",
+      "title": "Open WebUI",
+      "url": "http://localhost:8081",
+      "requires_running": true,
+      "start_action": "webui"
+    },
+    "manager_action_groups": [
+      {
+        "id": "openrouter_key",
+        "title": "OpenRouter",
+        "layout": "compact",
+        "entrypoint": "apply_key",
+        "result": "show_output",
+        "visibility": "installed",
+        "description": "Optional. Enables the Brain llm-wrapper tool bridge.",
+        "fields": [
+          {
+            "name": "openrouter_api_key",
+            "type": "secret",
+            "label": "OpenRouter key",
+            "secret_id": "openrouter.api_key",
+            "env": "OPENROUTER_API_KEY",
+            "optional": true
+          }
+        ],
+        "submit": {
+          "label": "Apply Key"
+        }
+      }
+    ],
+    "manager_actions": [
+      {
+        "id": "start",
+        "label": "Start Brain",
+        "entrypoint": "start",
+        "result": "show_output"
+      },
+      {
+        "id": "stop",
+        "label": "Stop Brain",
+        "entrypoint": "stop",
+        "result": "show_output"
+      },
+      {
+        "id": "webui",
+        "label": "Open WebUI",
+        "entrypoint": "webui",
+        "result": "open_in_manager"
+      },
+      {
+        "id": "browser",
+        "label": "Browser",
+        "entrypoint": "webui",
+        "result": "open_external_browser"
+      },
+      {
+        "id": "manage_models",
+        "label": "Manage Models",
+        "entrypoint": "manage_models",
+        "result": "open_terminal"
+      },
+      {
+        "id": "logs",
+        "label": "Logs",
+        "entrypoint": "logs",
+        "result": "show_output"
+      }
+    ]
   },
   "uninstall": {
     "supports_purge": true,
@@ -86,7 +172,8 @@
   },
   "notes": [
     "Brain is an installer module, not a runtime dump.",
-    "The custom manager page should expose separate service controls and model management.",
+    "Open WebUI is exposed through the Manager local_url path.",
+    "Manage Models keeps the installed lms-model terminal flow.",
     "Do not commit local models, venvs, Open WebUI databases, logs, secrets, or built llama-server binaries."
   ]
 }

@@ -71,6 +71,7 @@ fi
 if [[ "${PURGE}" -eq 1 ]]; then
   rm -rf "${BRAIN_INSTALL_ROOT}"
 else
+  rm -f "${BRAIN_INSTALL_ROOT}/.nymph-module-version"
   rm -rf \
     "${BRAIN_INSTALL_ROOT}/bin" \
     "${BRAIN_INSTALL_ROOT}/venv" \
