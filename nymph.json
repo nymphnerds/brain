@@ -3,7 +3,7 @@
   "id": "brain",
   "name": "Brain",
   "short_name": "BR",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Local assistant, llama-server, Open WebUI, and MCP orchestration stack packaged as an installable Nymph module.",
   "category": "service",
   "packaging": "repo",
@@ -55,6 +55,7 @@
   },
   "entrypoints": {
     "install": "scripts/install_brain.sh",
+    "update": "scripts/brain_update.sh",
     "status": "scripts/brain_status.sh",
     "start": "scripts/brain_start.sh",
     "stop": "scripts/brain_stop.sh",
