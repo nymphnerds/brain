@@ -3,7 +3,7 @@
   "id": "brain",
   "name": "Brain",
   "short_name": "BR",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Local assistant, llama-server, Open WebUI, and MCP orchestration stack packaged as an installable Nymph module.",
   "category": "service",
   "packaging": "repo",

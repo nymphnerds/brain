@@ -698,8 +698,9 @@ if [[ -n "${OPENROUTER_API_KEY}" ]]; then
     printf 'OPENROUTER_API_KEY=%s\n' "${OPENROUTER_API_KEY}"
     printf 'REMOTE_LLM_MODEL=%s\n' "deepseek/deepseek-chat"
   } > "${SECRET_DIR}/llm-wrapper.env"
-  chmod 600 "${SECRET_DIR}/llm-wrapper.env"
 fi
+touch "${SECRET_DIR}/llm-wrapper.env"
+chmod 600 "${SECRET_DIR}/llm-wrapper.env"
 
 LLM_WRAPPER_ENABLED="0"
 if [[ -s "${SECRET_DIR}/llm-wrapper.env" ]] && grep -q '^OPENROUTER_API_KEY=.' "${SECRET_DIR}/llm-wrapper.env"; then
