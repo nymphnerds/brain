@@ -25,10 +25,22 @@ echo "Starting Open WebUI..."
 nohup "${BRAIN_BIN_DIR}/open-webui-start" > "${log_file}" 2>&1 &
 starter_pid="$!"
 
-sleep 1
-if ! kill -0 "${starter_pid}" >/dev/null 2>&1; then
-  wait "${starter_pid}"
-fi
+for _ in $(seq 1 90); do
+  if brain_probe_url "${health_url}" >/dev/null 2>&1; then
+    echo "Open WebUI is ready."
+    echo "App: ${app_url}"
+    echo "Logs: ${log_file}"
+    exit 0
+  fi
 
+  if ! kill -0 "${starter_pid}" >/dev/null 2>&1; then
+    wait "${starter_pid}"
+  fi
+
+  echo "Open WebUI is still starting..."
+  sleep 1
+done
+
+echo "Open WebUI did not become ready in time."
 echo "App: ${app_url}"
 echo "Logs: ${log_file}"
