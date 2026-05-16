@@ -44,3 +44,13 @@ done
 echo "Open WebUI did not become ready in time."
 echo "App: ${app_url}"
 echo "Logs: ${log_file}"
+echo "OpenAPI tool routes:"
+echo "- filesystem: http://${BRAIN_MCP_HOST}:${BRAIN_MCPO_OPENAPI_PORT}/filesystem/docs"
+echo "- memory: http://${BRAIN_MCP_HOST}:${BRAIN_MCPO_OPENAPI_PORT}/memory/docs"
+echo "- web-forager: http://${BRAIN_MCP_HOST}:${BRAIN_MCPO_OPENAPI_PORT}/web-forager/docs"
+echo "- context7: http://${BRAIN_MCP_HOST}:${BRAIN_MCPO_OPENAPI_PORT}/context7/docs"
+echo "MCP config: ${BRAIN_INSTALL_ROOT}/mcp/config/mcp-proxy-servers.json"
+echo "mcpo config: ${BRAIN_INSTALL_ROOT}/mcp/config/mcpo-servers.json"
+echo "Cline config template: ${BRAIN_INSTALL_ROOT}/mcp/config/cline-mcp-settings.json"
+echo "Open WebUI setup note: ${BRAIN_INSTALL_ROOT}/mcp/config/open-webui-mcp-servers.md"
+exit 1

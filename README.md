@@ -81,6 +81,7 @@ After install:
 
 The installer does not need to download a model by default. A model can be selected later from the custom manager page or by running `lms-model`.
 The Manager `Manage Models` action opens the same `lms-model` script in a terminal.
+The Manager `Start Brain` action starts the local LLM and MCP services. The `Open WebUI` action starts or opens only Open WebUI, preserving the standard module split between backend start and browser UI.
 
 ## Repo Rule
 

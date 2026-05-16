@@ -21,6 +21,33 @@ state=available
 marker="${BRAIN_INSTALL_ROOT}/.nymph-module-version"
 detail="Not installed."
 
+loaded_model_from_api() {
+  brain_probe_url "http://${BRAIN_LLM_HOST}:${BRAIN_LLM_PORT}/v1/models" | python3 -c '
+import json
+import sys
+
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    raise SystemExit(0)
+
+models = data.get("data") if isinstance(data, dict) else None
+if not isinstance(models, list) or not models:
+    models = data.get("models") if isinstance(data, dict) else None
+
+if not isinstance(models, list):
+    raise SystemExit(0)
+
+for item in models:
+    if not isinstance(item, dict):
+        continue
+    value = item.get("id") or item.get("name") or item.get("model")
+    if value:
+        print(value)
+        break
+'
+}
+
 if [[ -f "${marker}" ]]; then
   installed=true
   runtime_present=true
@@ -52,8 +79,9 @@ if [[ -f "${BRAIN_INSTALL_ROOT}/secrets/llm-wrapper.env" ]]; then
   [[ -n "${configured_key}" ]] && openrouter_key="saved"
 fi
 
-if [[ "${installed}" == "true" ]] && brain_probe_url "http://${BRAIN_LLM_HOST}:${BRAIN_LLM_PORT}/v1/models" >/dev/null 2>&1; then
+if [[ "${installed}" == "true" ]] && loaded_model="$(loaded_model_from_api 2>/dev/null)" && [[ -n "${loaded_model}" ]]; then
   llm_running=true
+  local_model="${loaded_model}"
 fi
 
 if [[ "${installed}" == "true" ]] && brain_probe_url "http://${BRAIN_OPEN_WEBUI_HOST}:${BRAIN_OPEN_WEBUI_PORT}" >/dev/null 2>&1; then

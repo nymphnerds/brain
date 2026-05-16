@@ -68,6 +68,10 @@ The Manager page should stay native and module-owned through `nymph.json`.
 Open WebUI uses the WORBI-style `local_url` path. Manage Models keeps the
 interactive `lms-model` terminal flow.
 
+`Start Brain` owns the local LLM and MCP services. `Open WebUI` owns only
+starting/opening Open WebUI and printing the URL for `open_in_manager` or
+external-browser routing.
+
 ## What Stays Out Of Git
 
 - `venv`

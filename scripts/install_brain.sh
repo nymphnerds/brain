@@ -1925,7 +1925,16 @@ MCPO_LOG_FILE="${MCP_LOG_DIR}/mcpo.log"
 MCPO_CONFIG_FILE="${MCP_CONFIG_DIR}/mcpo-servers.json"
 
 is_running() {
-  [[ -f "${PID_FILE}" ]] && kill -0 "$(cat "${PID_FILE}")" >/dev/null 2>&1
+  if [[ -f "${PID_FILE}" ]] && kill -0 "$(cat "${PID_FILE}")" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  if curl -fsS "http://${MCP_HOST}:${MCP_PORT}/status" >/dev/null 2>&1 ||
+     curl -fsS "http://${MCP_HOST}:${MCP_PORT}/" >/dev/null 2>&1; then
+    return 0
+  fi
+
+  ss -ltn 2>/dev/null | awk -v target=":${MCP_PORT}" 'index($4, target) { found=1 } END { exit(found ? 0 : 1) }'
 }
 
 is_mcpo_running() {
@@ -2148,8 +2157,8 @@ OPEN_WEBUI_VENV_DIR="${INSTALL_ROOT}/open-webui-venv"
 OPEN_WEBUI_DATA_DIR="${INSTALL_ROOT}/open-webui-data"
 OPEN_WEBUI_LOG_DIR="${OPEN_WEBUI_DATA_DIR}/logs"
 SECRET_DIR="${INSTALL_ROOT}/secrets"
-OPEN_WEBUI_HOST="${NYMPHS_BRAIN_OPEN_WEBUI_HOST:-__OPEN_WEBUI_HOST__}"
-OPEN_WEBUI_PORT="${NYMPHS_BRAIN_OPEN_WEBUI_PORT:-__OPEN_WEBUI_PORT__}"
+OPEN_WEBUI_HOST="${NYMPHS_BRAIN_OPEN_WEBUI_HOST:-127.0.0.1}"
+OPEN_WEBUI_PORT="${NYMPHS_BRAIN_OPEN_WEBUI_PORT:-8081}"
 MCP_HOST="${NYMPHS_BRAIN_MCP_HOST:-${NYMPHS_BRAIN_MCPO_HOST:-__MCP_HOST__}}"
 MCP_PORT="${NYMPHS_BRAIN_MCP_PORT:-${NYMPHS_BRAIN_MCPO_PORT:-__MCP_PORT__}}"
 MCPO_OPENAPI_PORT="${NYMPHS_BRAIN_MCPO_OPENAPI_PORT:-__MCPO_OPENAPI_PORT__}"
@@ -2226,7 +2235,7 @@ seed_tool_server_connections
 WEBUI_SECRET_KEY="$(tr -d '\r\n' < "${WEBUI_SECRET_KEY_FILE}")"
 
 echo "Starting Open WebUI at http://${OPEN_WEBUI_HOST}:${OPEN_WEBUI_PORT}"
-nohup env \
+nohup setsid env \
   DATA_DIR="${OPEN_WEBUI_DATA_DIR}" \
   WEBUI_SECRET_KEY="${WEBUI_SECRET_KEY}" \
   ENABLE_DIRECT_CONNECTIONS="True" \
@@ -2262,8 +2271,8 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INSTALL_ROOT="$(dirname "${SCRIPT_DIR}")"
-OPEN_WEBUI_HOST="${NYMPHS_BRAIN_OPEN_WEBUI_HOST:-__OPEN_WEBUI_HOST__}"
-OPEN_WEBUI_PORT="${NYMPHS_BRAIN_OPEN_WEBUI_PORT:-__OPEN_WEBUI_PORT__}"
+OPEN_WEBUI_HOST="${NYMPHS_BRAIN_OPEN_WEBUI_HOST:-127.0.0.1}"
+OPEN_WEBUI_PORT="${NYMPHS_BRAIN_OPEN_WEBUI_PORT:-8081}"
 PID_FILE="${INSTALL_ROOT}/open-webui-data/logs/open-webui.pid"
 
 stop_pid() {
@@ -2420,6 +2429,34 @@ set -euo pipefail
 LOG_FILE="$HOME/Nymphs-Brain/logs/lms.log"
 LMS_START="$HOME/Nymphs-Brain/bin/lms-start"
 
+query_loaded_model() {
+    curl -fsS --connect-timeout 1 --max-time 3 "http://127.0.0.1:8000/v1/models" 2>/dev/null | \
+        python3 -c '
+import json
+import sys
+
+try:
+    data = json.load(sys.stdin)
+except Exception:
+    raise SystemExit(0)
+
+models = data.get("data") if isinstance(data, dict) else None
+if not isinstance(models, list) or not models:
+    models = data.get("models") if isinstance(data, dict) else None
+
+if not isinstance(models, list):
+    raise SystemExit(0)
+
+for item in models:
+    if not isinstance(item, dict):
+        continue
+    value = item.get("id") or item.get("name") or item.get("model")
+    if value:
+        print(value)
+        break
+'
+}
+
 case "${1:-}" in
     pid)
         ss -ltnp 2>/dev/null | awk '
@@ -2430,7 +2467,10 @@ case "${1:-}" in
         ;;
 
     model)
-        model=$(grep 'general.name str' "$LOG_FILE" 2>/dev/null | tail -1 | sed 's/.*= //' || true)
+        model=$(query_loaded_model || true)
+        if [ -z "$model" ]; then
+            model=$(grep 'general.name str' "$LOG_FILE" 2>/dev/null | tail -1 | sed 's/.*= //' || true)
+        fi
         if [ -n "$model" ]; then
             echo "$model"
         else
